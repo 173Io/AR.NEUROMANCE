@@ -68,7 +68,7 @@
             let initialDistance = null;
             let isDragging = false;
             let startPosition = null;
-            let currentTilt = { x: 0, z: 0 };
+            let tilt = { alpha: 0, beta: 0, gamma: 0 };
 
             // ピンチジェスチャーを検出してモデルのスケールを変更
             document.addEventListener('touchmove', function(event) {
@@ -139,7 +139,7 @@
                 model.setAttribute('position', initialPosition);
                 model.setAttribute('rotation', initialRotation);
                 model.setAttribute('scale', initialScale);
-                currentTilt = { x: 0, z: 0 }; // 傾きをリセット
+                tilt = { alpha: 0, beta: 0, gamma: 0 }; // 傾きをリセット
             });
 
             // スクリーンショットモード
@@ -155,15 +155,17 @@
             document.getElementById('tiltButton').addEventListener('click', function() {
                 if (window.DeviceOrientationEvent) {
                     window.addEventListener('deviceorientation', function(event) {
-                        const gamma = event.gamma; // 左右の傾き
-                        const beta = event.beta; // 前後の傾き
+                        tilt.alpha = event.alpha; // 回転軸Z
+                        tilt.beta = event.beta;   // 回転軸X
+                        tilt.gamma = event.gamma; // 回転軸Y
 
-                        // gamma と beta をモデルの rotation に反映
-                        currentTilt.x = THREE.Math.degToRad(beta);   // 前後の傾きを x 回転に適用
-                        currentTilt.z = THREE.Math.degToRad(gamma);  // 左右の傾きを z 回転に適用
-
-                        model.object3D.rotation.x = currentTilt.x;
-                        model.object3D.rotation.z = currentTilt.z;
+                        // スマホの傾きに基づいてモデルの回転を調整
+                        const rotation = model.getAttribute('rotation');
+                        model.setAttribute('rotation', {
+                            x: THREE.Math.degToRad(tilt.beta),
+                            y: THREE.Math.degToRad(tilt.gamma),
+                            z: THREE.Math.degToRad(tilt.alpha)
+                        });
                     }, { once: true }); // 一度だけイベントをリッスン
                 }
             });
