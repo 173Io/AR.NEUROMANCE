@@ -57,7 +57,7 @@
          document.addEventListener("DOMContentLoaded", function() {
             const model = document.getElementById('arModel');
             const initialPosition = { x: 0, y: 0, z: -2 };
-            const initialRotation = { x: 45, y: 45, z: 0 };
+            const initialRotation = { x: 0, y: 0, z: 0 };
             const initialScale = { x: 0.1, y: 0.1, z: 0.1 };
             let initialDistance = null;
             let isDragging = false;
@@ -123,7 +123,7 @@
             // 上回転
             document.getElementById('rotateUpButton').addEventListener('click', function() {
                 let rotation = model.getAttribute('rotation');
-                rotation.x += 45; // 45度上回転
+                rotation.z += 45; // 45度上回転
                 model.setAttribute('rotation', rotation);
             });
 
