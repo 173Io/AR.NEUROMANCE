@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR.js Ground Recognition</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+        /* ボタンのスタイルをカスタマイズ */
+        #rotateRightButton, #rotateUpButton, #resetButton, #screenshotButton {
+            position: absolute;
+            z-index: 1;
+            width: 50px;
+            height: 50px;
+            background-size: cover;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* 各ボタンに画像を適用 */
+        #rotateRightButton {
+            top: 10px;
+            left: 10px;
+            background-image: url('rotateRightButton.png'); /* 回転ボタンの画像 */
+        }
+        #rotateUpButton {
+            top: 70px;
+            left: 10px;
+            background-image: url('rotateUpButton.png'); /* 上回転ボタンの画像 */
+        }
+        #resetButton {
+            top: 130px;
+            left: 10px;
+            background-image: url('resetButton.png'); /* リセットボタンの画像 */
+        }
+        #screenshotButton {
+            top: 10px;
+            right: 10px;
+            background-image: url('screenshotButton.png'); /* スクリーンショットボタンの画像 */
+        }
+    </style>
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <a-scene vr-mode-ui="enabled: false;" embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <!-- 地面認識に基づいて3Dモデルを表示 -->
+        <a-entity id="arModel" gltf-model="url(neuromance.glb)" scale="0.1 0.1 0.1" position="0 0 -2" rotation="45 45 0"></a-entity>
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <button id="rotateRightButton"></button>
+    <button id="rotateUpButton"></button>
+    <button id="resetButton"></button>
+    <button id="screenshotButton"></button>
+
+    <script>
+         document.addEventListener("DOMContentLoaded", function() {
+            const model = document.getElementById('arModel');
+            const initialPosition = { x: 0, y: 0, z: -2 };
+            const initialRotation = { x: 45, y: 45, z: 0 };
+            const initialScale = { x: 0.1, y: 0.1, z: 0.1 };
+            let initialDistance = null;
+            let isDragging = false;
+            let startPosition = null;
+
+            // ピンチジェスチャーを検出してモデルのスケールを変更
+            document.addEventListener('touchmove', function(event) {
+                if (event.touches.length === 2) {
+                    const touch1 = event.touches[0];
+                    const touch2 = event.touches[1];
+                    const currentDistance = Math.hypot(touch2.pageX - touch1.pageX, touch2.pageY - touch1.pageY);
+
+                    if (initialDistance == null) {
+                        initialDistance = currentDistance;
+                    } else {
+                        const scaleChange = currentDistance / initialDistance;
+                        const currentScale = model.getAttribute('scale');
+                        model.setAttribute('scale', {
+                            x: currentScale.x * scaleChange,
+                            y: currentScale.y * scaleChange,
+                            z: currentScale.z * scaleChange
+                        });
+                        initialDistance = currentDistance;
+                    }
+                } else if (event.touches.length === 1 && isDragging) {
+                    // ドラッグしてモデルを移動
+                    const touch = event.touches[0];
+                    const dx = touch.pageX - startPosition.x;
+                    const dy = touch.pageY - startPosition.y;
+
+                    const newPosition = {
+                        x: model.object3D.position.x + dx * 0.005, // スケーリングファクターを調整
+                        y: model.object3D.position.y - dy * 0.005, // スケーリングファクターを調整
+                        z: model.object3D.position.z
+                    };
+
+                    model.setAttribute('position', newPosition);
+                    startPosition = { x: touch.pageX, y: touch.pageY };
+                }
+            });
+
+            document.addEventListener('touchstart', function(event) {
+                if (event.touches.length === 1) {
+                    isDragging = true;
+                    startPosition = { x: event.touches[0].pageX, y: event.touches[0].pageY };
+                }
+            });
+
+            document.addEventListener('touchend', function(event) {
+                if (event.touches.length === 0) {
+                    isDragging = false;
+                    initialDistance = null;
+                }
+            });
+
+            // 右回転
+            document.getElementById('rotateRightButton').addEventListener('click', function() {
+                let rotation = model.getAttribute('rotation');
+                rotation.y += 45; // 45度右回転
+                model.setAttribute('rotation', rotation);
+            });
+
+            // 上回転
+            document.getElementById('rotateUpButton').addEventListener('click', function() {
+                let rotation = model.getAttribute('rotation');
+                rotation.x += 45; // 45度上回転
+                model.setAttribute('rotation', rotation);
+            });
+
+            // リセット
+            document.getElementById('resetButton').addEventListener('click', function() {
+                model.setAttribute('position', initialPosition);
+                model.setAttribute('rotation', initialRotation);
+                model.setAttribute('scale', initialScale);
+            });
+
+            // スクリーンショットモード
+            document.getElementById('screenshotButton').addEventListener('click', function() {
+                const buttons = document.querySelectorAll('button');
+                buttons.forEach(button => button.style.display = 'none'); // ボタンを非表示
+                setTimeout(() => {
+                    buttons.forEach(button => button.style.display = 'block'); // ボタンを再表示
+                }, 3000); // 3秒後にボタンを再表示
+            });
+        });
+    </script>
+</body>
+</html>
