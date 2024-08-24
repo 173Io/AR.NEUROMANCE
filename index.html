@@ -54,7 +54,7 @@
     <button id="screenshotButton"></button>
 
     <script>
-         document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
             const model = document.getElementById('arModel');
             const initialPosition = { x: 0, y: 0, z: -2 };
             const initialRotation = { x: 0, y: 270, z: 0 };
@@ -142,7 +142,20 @@
                     buttons.forEach(button => button.style.display = 'block'); // ボタンを再表示
                 }, 3000); // 3秒後にボタンを再表示
             });
+
+            // スマホの傾きを取得してモデルを回転
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', function(event) {
+                    const gamma = event.gamma; // 左右の傾き
+                    const beta = event.beta; // 前後の傾き
+
+                    // gamma と beta をモデルの rotation に反映
+                    model.object3D.rotation.x = THREE.Math.degToRad(beta);   // 前後の傾きを x 回転に適用
+                    model.object3D.rotation.z = THREE.Math.degToRad(gamma);  // 左右の傾きを z 回転に適用
+                });
+            }
         });
     </script>
 </body>
 </html>
+
