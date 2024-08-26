@@ -39,6 +39,25 @@
             right: 10px;
             background-image: url('screenshotButton.png'); /* スクリーンショットボタンの画像 */
         }
+
+        /* スライダーのスタイルを追加 */
+        #rotationSliderX, #rotationSliderY, #rotationSliderZ {
+            position: absolute;
+            z-index: 1;
+            width: 200px;
+        }
+        #rotationSliderX {
+            top: 190px;
+            left: 10px;
+        }
+        #rotationSliderY {
+            top: 230px;
+            left: 10px;
+        }
+        #rotationSliderZ {
+            top: 270px;
+            left: 10px;
+        }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
@@ -48,13 +67,19 @@
         <a-entity camera></a-entity>
     </a-scene>
 
+    <!-- 回転制御ボタン -->
     <button id="rotateRightButton"></button>
     <button id="rotateUpButton"></button>
     <button id="resetButton"></button>
     <button id="screenshotButton"></button>
 
+    <!-- 回転制御用スライダー -->
+    <input type="range" id="rotationSliderX" min="0" max="360" value="0" step="1">
+    <input type="range" id="rotationSliderY" min="0" max="360" value="270" step="1">
+    <input type="range" id="rotationSliderZ" min="0" max="360" value="0" step="1">
+
     <script>
-         document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
             const model = document.getElementById('arModel');
             const initialPosition = { x: 0, y: 0, z: -2 };
             const initialRotation = { x: 0, y: 270, z: 0 };
@@ -62,6 +87,30 @@
             let initialDistance = null;
             let isDragging = false;
             let startPosition = null;
+
+            // スライダーの要素を取得
+            const rotationSliderX = document.getElementById('rotationSliderX');
+            const rotationSliderY = document.getElementById('rotationSliderY');
+            const rotationSliderZ = document.getElementById('rotationSliderZ');
+
+            // スライダーのイベントリスナーを追加
+            rotationSliderX.addEventListener('input', function() {
+                const rotation = model.getAttribute('rotation');
+                rotation.x = parseFloat(rotationSliderX.value);
+                model.setAttribute('rotation', rotation);
+            });
+
+            rotationSliderY.addEventListener('input', function() {
+                const rotation = model.getAttribute('rotation');
+                rotation.y = parseFloat(rotationSliderY.value);
+                model.setAttribute('rotation', rotation);
+            });
+
+            rotationSliderZ.addEventListener('input', function() {
+                const rotation = model.getAttribute('rotation');
+                rotation.z = parseFloat(rotationSliderZ.value);
+                model.setAttribute('rotation', rotation);
+            });
 
             // ピンチジェスチャーを検出してモデルのスケールを変更
             document.addEventListener('touchmove', function(event) {
@@ -118,6 +167,7 @@
                 let rotation = model.getAttribute('rotation');
                 rotation.y += 45; // 45度右回転
                 model.setAttribute('rotation', rotation);
+                rotationSliderY.value = rotation.y; // スライダーも同期
             });
 
             // 上回転
@@ -125,6 +175,7 @@
                 let rotation = model.getAttribute('rotation');
                 rotation.z -= 45; // 45度上回転
                 model.setAttribute('rotation', rotation);
+                rotationSliderZ.value = rotation.z; // スライダーも同期
             });
 
             // リセット
@@ -132,6 +183,10 @@
                 model.setAttribute('position', initialPosition);
                 model.setAttribute('rotation', initialRotation);
                 model.setAttribute('scale', initialScale);
+                // スライダーもリセット
+                rotationSliderX.value = initialRotation.x;
+                rotationSliderY.value = initialRotation.y;
+                rotationSliderZ.value = initialRotation.z;
             });
 
             // スクリーンショットモード
