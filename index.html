@@ -8,7 +8,7 @@
     <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
     <style>
         /* ボタンのスタイルをカスタマイズ */
-        #rotateRightButton, #rotateUpButton, #resetButton, #screenshotButton {
+        #rotateRightButton, #rotateLeftButton, #rotateUpButton, #rotateDownButton, #resetButton, #screenshotButton {
             position: absolute;
             z-index: 1;
             width: 50px;
@@ -20,17 +20,27 @@
         
         /* 各ボタンに画像を適用 */
         #rotateRightButton {
-            top: 10px;
-            left: 10px;
-            background-image: url('rotateRightButton.png'); /* 回転ボタンの画像 */
+            bottom: 70px;
+            right: 10px;
+            background-image: url('rotateRightButton.png'); /* 右回転ボタンの画像 */
+        }
+        #rotateLeftButton {
+            bottom: 70px;
+            right: 130px;
+            background-image: url('rotateLeftButton.png'); /* 左回転ボタンの画像 */
         }
         #rotateUpButton {
-            top: 70px;
-            left: 10px;
+            bottom: 130px;
+            right: 70px;
             background-image: url('rotateUpButton.png'); /* 上回転ボタンの画像 */
         }
+        #rotateDownButton {
+            bottom: 10px;
+            right: 70px;
+            background-image: url('rotateDownButton.png'); /* 下回転ボタンの画像 */
+        }
         #resetButton {
-            top: 130px;
+            top: 10px;
             left: 10px;
             background-image: url('resetButton.png'); /* リセットボタンの画像 */
         }
@@ -48,13 +58,18 @@
         <a-entity camera></a-entity>
     </a-scene>
 
+    <!-- 回転操作ボタン -->
     <button id="rotateRightButton"></button>
+    <button id="rotateLeftButton"></button>
     <button id="rotateUpButton"></button>
+    <button id="rotateDownButton"></button>
+
+    <!-- リセットとスクリーンショットボタン -->
     <button id="resetButton"></button>
     <button id="screenshotButton"></button>
 
     <script>
-         document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
             const model = document.getElementById('arModel');
             const initialPosition = { x: 0, y: 0, z: -2 };
             const initialRotation = { x: 0, y: 270, z: 0 };
@@ -120,10 +135,24 @@
                 model.setAttribute('rotation', rotation);
             });
 
+            // 左回転
+            document.getElementById('rotateLeftButton').addEventListener('click', function() {
+                let rotation = model.getAttribute('rotation');
+                rotation.y -= 45; // 45度左回転
+                model.setAttribute('rotation', rotation);
+            });
+
             // 上回転
             document.getElementById('rotateUpButton').addEventListener('click', function() {
                 let rotation = model.getAttribute('rotation');
                 rotation.z -= 45; // 45度上回転
+                model.setAttribute('rotation', rotation);
+            });
+
+            // 下回転
+            document.getElementById('rotateDownButton').addEventListener('click', function() {
+                let rotation = model.getAttribute('rotation');
+                rotation.z += 45; // 45度下回転
                 model.setAttribute('rotation', rotation);
             });
 
